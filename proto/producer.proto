@@ -1,0 +1,11 @@
+syntax = "proto3";
+option go_package = "./proto";
+package producer;
+
+import "order.proto";
+
+service ProducerService {
+  rpc NotifyOrderCreated(order.OrderResponse) returns (ProducerEmpty);
+}
+
+message ProducerEmpty {}

@@ -15,7 +15,8 @@ func Run(cfg *config.Config) error {
 	if err != nil {
 		return err
 	}
-	svc := application.NewService(repo)
+	cache := infrastructure.NewRedisCache(cfg.RedisAddr)
+	svc := application.NewService(repo, cache)
 	server := NewServer(svc)
 
 	lis, err := net.Listen("tcp", cfg.InventoryAddr)

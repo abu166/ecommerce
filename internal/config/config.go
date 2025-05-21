@@ -11,6 +11,9 @@ type Config struct {
 	InventoryAddr  string
 	OrderAddr      string
 	UserAddr       string
+	ProducerAddr   string
+	NATSAddr       string
+	RedisAddr      string
 	DBHost         string
 	DBPort         string
 	DBUser         string
@@ -28,9 +31,12 @@ func Load() (*Config, error) {
 		InventoryAddr:  getEnv("INVENTORY_ADDR", ":50051"),
 		OrderAddr:      getEnv("ORDER_ADDR", ":50052"),
 		UserAddr:       getEnv("USER_ADDR", ":50053"),
+		ProducerAddr:   getEnv("PRODUCER_ADDR", ":50054"),
+		NATSAddr:       getEnv("NATS_ADDR", "nats://localhost:4222"),
+		RedisAddr:      getEnv("REDIS_ADDR", "redis:6379"),
 		DBHost:         getEnv("DB_HOST", "localhost"),
 		DBPort:         getEnv("DB_PORT", "5432"),
-		DBUser:         getEnv("DB_USER", "abukhassymkhydyrbayev"),
+		DBUser:         getEnv("DB_USER", "postgres"),
 		DBPassword:     getEnv("DB_PASSWORD", "admin"),
 		DBName:         getEnv("DB_NAME", "ecommerce"),
 	}, nil

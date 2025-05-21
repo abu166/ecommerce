@@ -1,14 +1,12 @@
 syntax = "proto3";
-
 option go_package = "./proto";
-
 package inventory;
 
 service InventoryService {
   rpc CreateProduct(CreateProductRequest) returns (ProductResponse);
   rpc GetProduct(GetProductRequest) returns (ProductResponse);
   rpc UpdateProduct(UpdateProductRequest) returns (ProductResponse);
-  rpc DeleteProduct(DeleteProductRequest) returns (Empty);
+  rpc DeleteProduct(DeleteProductRequest) returns (InventoryEmpty);
   rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
 }
 
@@ -38,7 +36,6 @@ message DeleteProductRequest {
 message ListProductsRequest {
   int32 page = 1;
   int32 page_size = 2;
-  string category = 3;
 }
 
 message ProductResponse {
@@ -54,4 +51,4 @@ message ListProductsResponse {
   int32 total = 2;
 }
 
-message Empty {}
+message InventoryEmpty {}

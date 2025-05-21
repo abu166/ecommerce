@@ -1,0 +1,160 @@
+version: '3.8'
+
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: ecommerce
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-net
+
+
+  redis:
+    image: redis:6
+    ports:
+      - "6379:6379"
+    networks:
+      - ecommerce-net
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+          cpus: "0.2"
+
+  nats:
+    image: nats:2
+    ports:
+      - "4222:4222"
+    networks:
+      - ecommerce-net
+
+
+  apigateway:
+    build: .
+    command: go run cmd/apigateway/main.go
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - inventory
+      - order
+      - user
+    environment:
+      - API_GATEWAY_ADDR=:8080
+      - INVENTORY_ADDR=inventory:50051
+      - ORDER_ADDR=order:50052
+      - USER_ADDR=user:50053
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=admin
+      - DB_NAME=ecommerce
+    networks:
+      - ecommerce-net
+
+
+  inventory:
+    build: .
+    command: go run cmd/inventory/main.go
+    ports:
+      - "50051:50051"
+    depends_on:
+      - postgres
+    environment:
+      - INVENTORY_ADDR=:50051
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=admin
+      - DB_NAME=ecommerce
+    networks:
+      - ecommerce-net
+
+
+  order:
+    build: .
+    command: go run cmd/order/main.go
+    ports:
+      - "50052:50052"
+    depends_on:
+      - postgres
+      - inventory
+    environment:
+      - ORDER_ADDR=:50052
+      - INVENTORY_ADDR=inventory:50051
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=admin
+      - DB_NAME=ecommerce
+    networks:
+      - ecommerce-net
+
+
+  user:
+    build: .
+    command: go run cmd/user/main.go
+    ports:
+      - "50053:50053"
+    depends_on:
+      - postgres
+    environment:
+      - USER_ADDR=:50053
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=admin
+      - DB_NAME=ecommerce
+    networks:
+      - ecommerce-net
+
+
+  producer:
+    build: .
+    command: go run cmd/producer/main.go
+    ports:
+      - "50054:50054"
+    depends_on:
+      - nats
+      - order
+    environment:
+      - PRODUCER_ADDR=:50054
+      - ORDER_ADDR=order:50052
+      - NATS_ADDR=nats://nats:4222
+    networks:
+      - ecommerce-net
+
+
+  consumer:
+    build: .
+    command: go run cmd/consumer/main.go
+    depends_on:
+      - nats
+      - inventory
+    environment:
+      - CONSUMER_ADDR=:50055
+      - INVENTORY_ADDR=inventory:50051
+      - NATS_ADDR=nats://nats:4222
+    networks:
+      - ecommerce-net
+
+
+volumes:
+  postgres_data:
+
+
+networks:
+  ecommerce-net:
+    driver: bridge

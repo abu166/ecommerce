@@ -2,10 +2,8 @@ package order
 
 import (
 	"ecommerce/internal/config"
-	invApp "ecommerce/internal/inventory/application"
-	invInfra "ecommerce/internal/inventory/infrastructure"
-	ordApp "ecommerce/internal/order/application"
-	ordInfra "ecommerce/internal/order/infrastructure"
+	"ecommerce/internal/order/application"
+	"ecommerce/internal/order/infrastructure"
 	"ecommerce/proto"
 	"google.golang.org/grpc"
 	"log"
@@ -13,22 +11,14 @@ import (
 )
 
 func Run(cfg *config.Config) error {
-	// Initialize inventory repository and service
-	invRepo, err := invInfra.NewRepository(cfg.DSN())
+	repo, err := infrastructure.NewRepository(cfg.DSN())
 	if err != nil {
 		return err
 	}
-	invSvc := invApp.NewService(invRepo)
+	cache := infrastructure.NewRedisCache(cfg.RedisAddr)
+	svc := application.NewService(repo, cache)
+	server := NewServer(svc)
 
-	// Initialize order repository and service
-	ordRepo, err := ordInfra.NewRepository(cfg.DSN())
-	if err != nil {
-		return err
-	}
-	ordSvc := ordApp.NewService(ordRepo, invSvc)
-
-	// Start gRPC server
-	server := NewServer(ordSvc)
 	lis, err := net.Listen("tcp", cfg.OrderAddr)
 	if err != nil {
 		return err

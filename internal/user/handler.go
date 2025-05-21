@@ -19,6 +19,9 @@ func NewServer(svc *application.Service) *Server {
 }
 
 func (s *Server) RegisterUser(ctx context.Context, req *proto.RegisterUserRequest) (*proto.UserResponse, error) {
+	if req.Username == "" || req.Password == "" || req.Email == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "username, password, and email are required")
+	}
 	u := &domain.User{
 		Username: req.Username,
 		Password: req.Password,
@@ -35,6 +38,9 @@ func (s *Server) RegisterUser(ctx context.Context, req *proto.RegisterUserReques
 }
 
 func (s *Server) AuthenticateUser(ctx context.Context, req *proto.AuthenticateUserRequest) (*proto.AuthResponse, error) {
+	if req.Username == "" || req.Password == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "username and password are required")
+	}
 	token, err := s.svc.Authenticate(ctx, req.Username, req.Password)
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "authentication failed: %v", err)
@@ -43,6 +49,9 @@ func (s *Server) AuthenticateUser(ctx context.Context, req *proto.AuthenticateUs
 }
 
 func (s *Server) GetUserProfile(ctx context.Context, req *proto.GetUserProfileRequest) (*proto.UserResponse, error) {
+	if req.Id == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "user ID is required")
+	}
 	u, err := s.svc.GetProfile(ctx, req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "user not found: %v", err)

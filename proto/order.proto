@@ -14,6 +14,7 @@ service OrderService {
 message CreateOrderRequest {
   string user_id = 1;
   repeated OrderItem items = 2;
+  double total = 3; // Added total field
 }
 
 message OrderItem {

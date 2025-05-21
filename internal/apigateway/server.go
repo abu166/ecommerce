@@ -16,15 +16,15 @@ type Server struct {
 }
 
 func NewServer(cfg *config.Config) (*Server, error) {
-	invConn, err := grpc.Dial("localhost"+cfg.InventoryAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	invConn, err := grpc.Dial(cfg.InventoryAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
-	ordConn, err := grpc.Dial("localhost"+cfg.OrderAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	ordConn, err := grpc.Dial(cfg.OrderAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
-	usrConn, err := grpc.Dial("localhost"+cfg.UserAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	usrConn, err := grpc.Dial(cfg.UserAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}

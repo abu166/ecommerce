@@ -1,19 +1,21 @@
 package domain
 
-import "time"
+import (
+	"time"
+)
 
 type Order struct {
-	ID        string `gorm:"primaryKey;type:uuid"` // CHANGED: Added type:uuid
-	UserID    string
-	Items     []OrderItem
-	Status    string
-	Total     float64
-	CreatedAt time.Time // ADDED: To support timestamps
-	UpdatedAt time.Time // ADDED: To support timestamps
+	ID        string      `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
+	UserID    string      `gorm:"type:uuid;not null"`
+	Items     []OrderItem `gorm:"foreignKey:OrderID"`
+	Total     float64     `gorm:"not null"`
+	Status    string      `gorm:"default:'pending'"`
+	CreatedAt time.Time   `gorm:"autoCreateTime"`
+	UpdatedAt time.Time   `gorm:"autoUpdateTime"`
 }
 
 type OrderItem struct {
-	OrderID   string `gorm:"primaryKey;type:uuid"` // CHANGED: Added type:uuid
-	ProductID string
-	Quantity  int
+	OrderID   string `gorm:"type:uuid;primaryKey"`
+	ProductID string `gorm:"type:uuid;primaryKey"`
+	Quantity  int    `gorm:"not null"`
 }

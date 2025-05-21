@@ -78,11 +78,9 @@ func (s *Server) deleteProduct(c *gin.Context) {
 func (s *Server) listProducts(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
-	category := c.Query("category")
 	resp, err := s.invClient.ListProducts(c.Request.Context(), &proto.ListProductsRequest{
 		Page:     int32(page),
 		PageSize: int32(pageSize),
-		Category: category,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
